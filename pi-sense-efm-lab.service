@@ -1,0 +1,11 @@
+[Unit]
+Description=pi-sense-efm-lab daemon
+After=network.target
+
+[Service]
+Restart=always
+ExecStart=/home/picon/pi-sense-efm-lab/pi-sense-efm-lab.py --log_file /home/picon/pi-sense-efm-lab/pi-sense-efm-lab.log --conf_file /home/picon/pi-sense-efm-lab/pi-sense-efm-lab.ini
+User=picon
+
+[Install]
+WantedBy=multi-user.target
