@@ -1,6 +1,6 @@
 [Unit]
 Description=pi-sense-efm-lab daemon
-After=network.target
+After=pi-sense-boot.service
 
 [Service]
 Restart=always
