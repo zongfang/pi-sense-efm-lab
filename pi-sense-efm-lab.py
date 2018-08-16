@@ -48,6 +48,7 @@ def on_mqtt_connect(client, userdata, flags, rc):
         # Successful connection
         log.info('Connected to MQTT broker')
         MQTT_CONNECTED = True
+        status_box([0, 255, 0])
 
         # Subscribe to the display topic with subtopic ID
         display_topic = '{0}/{1}'.format(config['display']['topic'], config['mqtt']['id'])
@@ -56,6 +57,7 @@ def on_mqtt_connect(client, userdata, flags, rc):
         # An error of some kind
         log.error('MQTT broker connection error: {0}'.format(mqtt.connack_string(rc)))
         MQTT_CONNECTED = False
+        status_box([255, 0, 0])
 
 
 def on_mqtt_disconnect(client, userdata, rc):
@@ -63,6 +65,7 @@ def on_mqtt_disconnect(client, userdata, rc):
     global MQTT_CONNECTED
     log = logging.getLogger('pi-sense-efm-lab')
     MQTT_CONNECTED = False
+    status_box([255, 0, 0])
     if rc != 0:
         # Not a disconnect the client asked for
         log.warning('Disconnected from MQTT broker: {0}'.format(mqtt.connack_string(rc)))
@@ -99,6 +102,7 @@ def on_mqtt_message(client, userdata, message):
 
 def send_sensor_data():
     """ Read the environmental sensors and send the data via MQTT """
+    log = logging.getLogger('pi-sense-efm-lab')
     if MQTT_CONNECTED:
         topic = '{0}/{1}'.format(config['sensor']['topic'], config['mqtt']['id'])
         message = {
@@ -108,11 +112,13 @@ def send_sensor_data():
             'temp_c': sense.get_temperature(),
             'press_hpa': sense.get_pressure() / 100
         }
+        log.debug('Sending to {0}: {1}'.format(topic, json.dumps(message)))
         client.publish(topic, json.dumps(message))
 
 
 def send_joystick_data(event):
     """ Read the joystick buffer and send the data via MQTT """
+    log = logging.getLogger('pi-sense-efm-lab')
     if MQTT_CONNECTED:
         topic = '{0}/{1}'.format(config['control']['topic'], config['mqtt']['id'])
         message = {
@@ -121,7 +127,19 @@ def send_joystick_data(event):
             'direction': event.direction,
             'action': event.action
         }
+        log.debug('Sending to {0}: {1}'.format(topic, json.dumps(message)))
         client.publish(topic, json.dumps(message))
+
+
+def status_box(color):
+    """
+    Display a status box in the center of the display using the passed in
+    color [R, G, B] values
+    """
+    sense.set_pixel(3, 3, color)
+    sense.set_pixel(3, 4, color)
+    sense.set_pixel(4, 3, color)
+    sense.set_pixel(4, 4, color)
 
 
 def main():
@@ -159,8 +177,9 @@ def main():
 
     log.info('Starting up')
 
-    # Clear the display
+    # Clear the display and set status as disconnected
     sense.clear()
+    status_box([255, 0, 0])
 
     # Load the main config file
     config = configparser.ConfigParser()
