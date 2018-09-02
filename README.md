@@ -1,30 +1,87 @@
 ## Synopsis
 
-At the top of the file there should be a short introduction and/ or overview that explains **what** the project is. This description should match descriptions added for package managers (Gemspec, package.json, etc.)
+Use the Raspberry Pi Sense Hat as part of a Cisco Kinetic EFM Lab to
+- Act as a sensor and send environmental data via MQTT
+- Act as a control and send joystick actions via MQTT
+- Display received data from MQTT via the RGB LED matrix
 
-## Code Example
-
-Show what the library does as concisely as possible, developers should be able to figure out **how** your project solves their problem by looking at the code example. Make sure the API you are showing off is obvious, and that your code is short and concise.
-
-## Motivation
-
-A short description of the motivation behind the creation and maintenance of the project. This should explain **why** the project exists.
+## Hardware
+This has only been tested on Raspbian running on a Raspberry Pi 3 Model B+ and the official Sense HAT.
 
 ## Installation
 
-Provide code examples and explanations of how to get the project.
+### Install Prerequisites
+```
+sudo apt update
+sudo apt install sense-hat python3-pip
+sudo pip3 install paho-mqtt
+sudo reboot
+```
 
-## API Reference
+### Download and Install
+This assumes a local sudo user called `picon` exists and the project will be installed in `~/pi-sense-efm-lab`. It also assumes the `pi-sense-boot` project is being used. Adjust the .service file accordingly to change paths and startup dependencies.
 
-Depending on the size of the project, if it is small and simple enough the reference docs can be added to the README. For medium size to larger projects it is important to at least provide a link to where the API reference docs live.
+1. Clone or download the project via Github
+2. Install the service
+```
+cd ~/pi-sense-efm-lab
+sudo mv pi-sense-efm-lab.service /lib/systemd/system/
+sudo systemctl enable pi-sense-efm-lab
+```
 
-## Tests
+## MQTT Message Reference
 
-Describe and show how to run the tests with code examples.
+### Sensor
+These JSON messages are published to the `sensor` topic every 3 seconds, unless set differently in the .ini file.
+```
+{
+    "id": "pi-sense",
+    "timestamp": time.time(),
+    "humidity": sense.get_humidity(),
+    "temp_c": sense.get_temperature(),
+    "press_hpa": sense.get_pressure() / 100
+}
+```
 
-## Contributors
+### Control
+These JSON messages are published to the `control` topic as joystick events are created, unless set differently in the .ini file.
+```
+{
+    "id": "pi-sense",
+    "timestamp": event.timestamp,
+    "direction": event.direction,
+    "action": event.action
+}
+```
 
-Let people know how they can dive into the project, include important links to things like issue trackers, irc, twitter accounts if applicable.
+### Display
+These JSON messages are received and processed via MQTT on the subscribed `display` topic, unless set differently in the .ini file.
+
+#### Clear the display
+```
+{
+    "action": "clear"
+}
+```
+
+#### Display some text
+```
+{
+    "action": "text",
+    "text": "This is the message to show",
+    "color": [red_value, green_value, blue_value]
+}
+```
+
+#### Set a pixel
+```
+{
+    "action": "draw",
+    "x": x_value,
+    "y": y_value,
+    "color": [red_value, green_value, blue_value]
+}
+```
 
 ## License
 

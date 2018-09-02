@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Use the Raspberry Pi Sense Hat as part of an Cisco Kinetic EFM Lab to
+Use the Raspberry Pi Sense Hat as part of a Cisco Kinetic EFM Lab to
 - Act as a sensor and send environmental data via MQTT
-- Display received data from MQTT via the RGB LED matrix
 - Act as a control and send joystick actions via MQTT
+- Display received data from MQTT via the RGB LED matrix
 """
 import argparse
 import logging
