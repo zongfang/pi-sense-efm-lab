@@ -55,7 +55,7 @@ These JSON messages are published to the `control` topic as joystick events are 
 ```
 
 ### Display
-These JSON messages are received and processed via MQTT on the subscribed `display` topic, unless set differently in the .ini file.
+These JSON messages are received and processed via MQTT on the subscribed `display/pi-sense` topic, unless set differently in the .ini file.
 
 #### Clear the display
 ```
